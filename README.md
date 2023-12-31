@@ -1,54 +1,38 @@
+# MicroPython的ST7789驱动程序
 
-# ST7789 Driver for MicroPython
+该驱动程序基于[devbis的st7789_mpy驱动程序。](https://github.com/devbis/st7789_mpy) 我修改了原始驱动程序，为我的一个项目添加了以下功能：
 
-This driver is based on [devbis' st7789_mpy driver.](https://github.com/devbis/st7789_mpy)
-I modified the original driver for one of my projects to add:
+- 显示旋转
+- 滚动
+- 使用从True Type字体转换的位图写入文本
+- 使用8位和16位宽位图字体绘制文本
+- 使用Hershey矢量字体绘制文本
+- 绘制JPG，包括一个慢速模式，用于绘制大于可用RAM的JPG，使用来自http://elm-chan.org/fsw/tjpgd/00index.html的TJpgDec - Tiny JPEG解压缩器R0.01d。
+- 使用https://github.com/kikuchan/pngle中的pngle库绘制PNG
+- 绘制和旋转多边形和填充多边形
+- 跟踪边界
+- 自定义初始化功能，以支持st7735、ili9341、ili9342和其他显示器。请参见M5Stack Core、M5Stack Core2、T-DONGLE-S3和Wio_Terminal设备的examples/configs文件夹。
 
-- Display Rotation.
-- Scrolling
-- Writing text using bitmaps converted from True Type fonts
-- Drawing text using 8 and 16-bit wide bitmap fonts
-- Drawing text using Hershey vector fonts
-- Drawing JPGs, including a SLOW mode to draw jpg's larger than available ram
-  using the TJpgDec - Tiny JPEG Decompressor R0.01d. from
-  http://elm-chan.org/fsw/tjpgd/00index.html
-- Drawing PNGs using the pngle library from https://github.com/kikuchan/pngle
-- Drawing and rotating Polygons and filled Polygons.
-- Tracking bounds
-- Custom init capability to support st7735, ili9341, ili9342 and other displays. See the examples/configs folder for M5Stack Core, M5Stack Core2, T-DONGLE-S3 and Wio_Terminal devices.
+附带了12种基于经典PC文本模式字体的位图字体，26种Hershey矢量字体以及用于不同设备的几个示例程序。
 
-Included are 12 bitmap fonts derived from classic pc text mode fonts, 26
-Hershey vector fonts and several example programs for different devices.
+## 显示配置
 
-## Display Configuration
+一些显示器可能使用BGR颜色顺序或反转颜色。 `cfg_helper.py` 程序可用于确定显示器所需的颜色顺序、反转模式、colstart 和 rowstart 值。
 
-Some displays may use a BGR color order or inverted colors. The `cfg_helper.py`
-program can be used to determine the color order, inversion_mode, colstart, and
-rowstart values needed for a display.
+### 颜色模式
 
-### Color Modes
+您可以通过使用 `st7789.RED` 颜色填充显示器并观察实际显示的颜色来测试显示器所需的正确颜色顺序。
 
-You can test for the correct color order needed by a display by filling it with
-the `st7789.RED` color and observing the actual color displayed.
+- 如果显示的颜色是红色，则设置正确。
+- 如果显示的颜色是蓝色，则 `color_order` 应为 `st7789.BGR`。
+- 如果显示的颜色是黄色，则 `inversion_mode` 应为 `True`。
+- 如果显示的颜色是青色，则 `color_order` 应为 `st7789.BGR` 并且 `inversion_mode` 应为 `True`。
 
-  - If the displayed color is RED, the settings are correct.
-  - If the displayed color is BLUE, `color_order` should be `st7789.BGR`.
-  - If the displayed color is YELLOW, `inversion_mode` should be `True.`
-  - If the displayed color is CYAN, `color_order` should be `st7789.BGR` and
-    `inversion_mode` should be `True.`
+### colstart 和 rowstart
 
-### colstart and rowstart
+一些显示器的帧缓冲内存比物理显示矩阵要大。在这些情况下，驱动程序必须配置为相对于帧缓冲的第一个物理列和行像素的位置。每个显示的旋转设置可能需要不同的 colstart 和 rowstart 值。
 
-Some displays have a frame buffer memory larger than the physical display
-matrix. In these cases, the driver must be configured with the position of the
-first physical column and row pixels relative to the frame buffer. Each
-rotation setting of the display may require different colstart and rowstart
-values.
-
-The driver automatically sets the `colstart` and `rowstart` values for common
-135x240, 240x240, 170x320 and 240x320 displays. If the default values do not work for
-your display, these values can be overridden using the `offsets` method. The
-`offsets` method should be called after any `rotation` method calls.
+对于常见的 135x240、240x240、170x320 和 240x320 显示器，驱动程序会自动设置 `colstart` 和 `rowstart` 值。如果默认值对您的显示器不起作用，可以使用 `offsets` 方法覆盖这些值。`offsets` 方法应在任何 `rotation` 方法调用之后调用。
 
 #### 128x128 st7735 cfg_helper.py example
 
@@ -72,13 +56,11 @@ for rotation 2 use offset(0, 0)
 for rotation 3 use offset(0, 0)
 ```
 
-## Pre-compiled firmware files
+##  预编译固件文件
 
-The firmware directory contains pre-compiled firmware for various devices with
-the st7789 C driver and frozen python font files. See the README.md file in the
-fonts folder for more information on the font files.
+固件目录包含了使用 st7789 C 驱动程序和冻结的 Python 字体文件为各种设备预编译的固件。有关字体文件的更多信息，请参阅 fonts 文件夹中的 README.md 文件。
 
-MicroPython MicroPython v1.20.0 compiled with ESP IDF v4.4.4 using CMake
+MicroPython 版本为 MicroPython v1.20.0，使用 ESP IDF v4.4.4 编译，使用 CMake 构建。
 
 Directory             | File         | Device
 --------------------- | ------------ | ----------------------------------
@@ -127,11 +109,9 @@ This is a work in progress.
 
 -- Russ
 
-## Overview
+##  概述
 
-This is a driver for MicroPython to handle cheap displays based on the ST7789
-chip. The driver is written in C. Firmware is provided for ESP32, ESP32 with SPIRAM,
-pyboard1.1, and Raspberry Pi Pico devices.
+这是一个用于处理基于 ST7789 芯片的廉价显示器的 MicroPython 驱动程序。该驱动程序是用 C 语言编写的。提供了适用于 ESP32、带有 SPIRAM 的 ESP32、pyboard1.1 和 Raspberry Pi Pico 设备的固件。
 
 
 <p align="center">
@@ -139,82 +119,71 @@ pyboard1.1, and Raspberry Pi Pico devices.
 </p>
 
 
-# Setup MicroPython Build Environment in Ubuntu 20.04.2
+# 在 Ubuntu 20.04.2 中设置 MicroPython 构建环境
 
-See the MicroPython
-[README.md](https://github.com/micropython/micropython/blob/master/ports/esp32/README.md#setting-up-esp-idf-and-the-build-environment)
-if you run into any build issues not directly related to the st7789 driver. The
-recommended MicroPython build instructions may have changed.
+如果遇到与 st7789 驱动程序直接无关的任何构建问题，请查看 MicroPython [README.md](https://github.com/micropython/micropython/blob/master/ports/esp32/README.md#setting-up-esp-idf-and-the-build-environment)。建议的 MicroPython 构建说明可能已经更改。
 
-Update and upgrade Ubuntu using apt-get if you are using a new install of
-Ubuntu or the Windows Subsystem for Linux.
+如果您是在新安装的 Ubuntu 或 Windows Subsystem for Linux 上使用，请使用 apt-get 更新和升级 Ubuntu。
 
 ```bash
-sudo apt-get -y update
+apt-get -y update
 sudo apt-get -y upgrade
 ```
 
-Use apt-get to install the required build tools.
+使用 apt-get 安装所需的构建工具。
 
 ```bash
 sudo apt-get -y install build-essential libffi-dev git pkg-config cmake virtualenv python3-pip python3-virtualenv
 ```
 
-### Install a compatible esp-idf SDK
+### 安装兼容的 esp-idf SDK
 
-The MicroPython README.md states: "The ESP-IDF changes quickly, and MicroPython
-only supports certain versions. Currently, MicroPython supports v4.0.2, v4.1.1,
-and v4.2 although other IDF v4 versions may also work."  I have had good luck
-using IDF v4.4
+MicroPython README.md 中提到："ESP-IDF 变化很快，MicroPython 仅支持特定版本。当前，MicroPython 支持 v4.0.2、v4.1.1 和 v4.2，尽管其他 IDF v4 版本也可能有效。" 我在使用 IDF v4.4 时取得了良好的效果。
 
-Clone the esp-idf SDK repo -- this usually takes several minutes.
+克隆 esp-idf SDK 存储库 - 这通常需要几分钟。
 
 ```bash
-git clone -b v4.4 --recursive https://github.com/espressif/esp-idf.git
+-b v4.4 --recursive https://github.com/espressif/esp-idf.git
 cd esp-idf/
 git pull
 ```
 
-If you already have a copy of the IDF, you can checkout a version compatible
-with MicroPython and update the submodules using:
+如果您已经有了 IDF 的副本，可以检出与 MicroPython 兼容的版本，并使用以下命令更新子模块：
 
 ```bash
-$ cd esp-idf
 $ git checkout v4.4
 $ git submodule update --init --recursive
 ```
 
-Install the esp-idf SDK.
+安装 esp-idf SDK。
 
 ```bash
 ./install.sh
 ```
 
-Source the esp-idf export.sh script to set the required environment variables.
-You must source the file and not run it using ./export.sh. You will need to
-source this file before compiling MicroPython.
+将 esp-idf export.sh 脚本源化以设置所需的环境变量。您必须源化文件，而不能使用 ./export.sh 运行它。在编译 MicroPython 之前，您需要在这个文件之前源化它。
 
 ```bash
-source export.sh
+export.sh
 cd ..
 ```
 
-Clone the MicroPython repo.
+克隆 MicroPython 存储库。
 
 ```bash
 git clone https://github.com/micropython/micropython.git
 ```
 
-Clone the st7789 driver repo.
+克隆 st7789 驱动程序存储库。
 
 ```bash
 git clone https://github.com/russhughes/st7789_mpy.git
 ```
 
-Update the git submodules and compile the MicroPython cross-compiler
+更新 git 子模块并编译 MicroPython 交叉编译器。
 
 ```bash
-cd micropython/
+micropython/
 git submodule update --init
 cd mpy-cross/
 make
@@ -222,13 +191,9 @@ cd ..
 cd ports/esp32
 ```
 
-Copy any .py files you want to include in the firmware as frozen python modules
-to the modules subdirectory in ports/esp32. Be aware there is a limit to the
-flash space available. You will know you have exceeded this limit if you
-receive an error message saying the code won't fit in the partition or if your
-firmware continuously reboots with an error.
+将要包含在固件中作为冻结的 Python 模块的任何 .py 文件复制到 ports/esp32 中的 modules 子目录中。请注意，可用的闪存空间有限。如果您收到一条错误消息，指示代码不适合分区，或者如果您的固件持续以错误重新启动，则说明您已超出了此限制。
 
-For example:
+例如：
 
 ```bash
 cp ../../../st7789_mpy/fonts/bitmap/vga1_16x16.py modules
@@ -236,33 +201,26 @@ cp ../../../st7789_mpy/fonts/truetype/NotoSans_32.py modules
 cp ../../../st7789_mpy/fonts/vector/scripts.py modules
 ```
 
-Build the MicroPython firmware with the driver and frozen .py files in the
-modules directory. If you did not add any .py files to the modules directory,
-you can leave out the FROZEN_MANIFEST and FROZEN_MPY_DIR settings.
+使用位于 modules 目录中的驱动程序和冻结的 .py 文件构建 MicroPython 固件。如果您没有将任何 .py 文件添加到 modules 目录中，可以省略 FROZEN_MANIFEST 和 FROZEN_MPY_DIR 设置。
 
 ```bash
 make USER_C_MODULES=../../../../st7789_mpy/st7789/micropython.cmake FROZEN_MANIFEST="" FROZEN_MPY_DIR=$UPYDIR/modules
 ```
 
-Erase and flash the firmware to your device. Set PORT= to the ESP32's usb
-serial port. I could not get the USB serial port to work under the Windows
-Subsystem (WSL2) for Linux. If you have the same issue, you can copy the
-firmware.bin file and use the Windows esptool.py to flash your device.
+擦除并将固件刷入设备。将 PORT= 设置为 ESP32 的 USB 串行端口。我在 Windows 子系统（WSL2）中无法使 USB 串行端口工作。如果您遇到相同的问题，可以复制 firmware.bin 文件并使用 Windows 的 esptool.py 刷写设备。
 
 ```bash
-make USER_C_MODULES=../../../../st7789_mpy/st7789/micropython.cmake PORT=/dev/ttyUSB0 erase
+USER_C_MODULES=../../../../st7789_mpy/st7789/micropython.cmake PORT=/dev/ttyUSB0 erase
 make USER_C_MODULES=../../../../st7789_mpy/st7789/micropython.cmake PORT=/dev/ttyUSB0 deploy
 ```
 
-The firmware.bin file will be in the build-GENERIC directory. To flash using
-the python esptool.py utility. Use pip3 to install the esptool if it's not
-already installed.
+firmware.bin 文件将位于 build-GENERIC 目录中。要使用 python 的 esptool.py 实用程序进行刷写，请使用 pip3 安装 esptool（如果尚未安装）。
 
 ```bash
 pip3 install esptool
 ```
 
-Set PORT= to the ESP32's USB serial port
+将 PORT= 设置为 ESP32 的 USB 串行端口。
 
 ```bash
 esptool.py --port COM3 erase_flash
@@ -288,129 +246,106 @@ And then compile the module with specified USER_C_MODULES dir.
 
 ## Working examples
 
-This module was tested on ESP32, STM32 based pyboard v1.1, and the Raspberry Pi
-Pico. You have to provide an `SPI` object and the pin to use for the `dc' input
-of the screen.
+该模块在ESP32、基于STM32的pyboard v1.1以及树莓派Pico上进行了测试。您需要提供一个 `SPI` 对象和用于屏幕 `dc` 输入的引脚。
 
 
-    # ESP32 Example
-    # To use baudrates above 26.6MHz you must use my firmware or modify the micropython
-    # source code to increase the SPI baudrate limit by adding SPI_DEVICE_NO_DUMMY to the
-    # .flag member of the spi_device_interface_config_t struct in the machine_hw_spi_init_internal.c
-    # file.  Not doing so will cause the ESP32 to crash if you use a baudrate that is too high.
+```python
+"""
+ESP32 示例
+要使用高于26.6MHz的波特率，您必须使用我的固件或修改 micropython 源代码，通过在 machine_hw_spi_init_internal.c   文件中的 spi_device_interface_config_t 结构体的 .flag 成员中添加 SPI_DEVICE_NO_DUMMY 来增加 SPI 波特率限制。如果不这样做，使用过高波特率将导致 ESP32 崩溃。
+"""
 
-    import machine
-    import st7789
-    spi = machine.SPI(2, baudrate=40000000, polarity=1, sck=machine.Pin(18), mosi=machine.Pin(23))
-    display = st7789.ST7789(spi, 240, 240, reset=machine.Pin(4, machine.Pin.OUT), dc=machine.Pin(2, machine.Pin.OUT))
-    display.init()
+import machine
+import st7789
+spi = machine.SPI(2, baudrate=40000000, polarity=1, sck=machine.Pin(18), mosi=machine.Pin(23))
+display = st7789.ST7789(spi, 240, 240, reset=machine.Pin(4, machine.Pin.OUT), dc=machine.Pin(2, machine.Pin.OUT))
+display.init()
+```
 
-
-## Methods
+## 方法
 
 - `st7789.ST7789(spi, width, height, dc, reset, cs, backlight, rotations, rotation, custom_init, color_order, inversion, options, buffer_size)`
 
-    ### Required positional arguments:
-    - `spi` spi device
-    - `width` display width
-    - `height` display height
+  ### 必需的位置参数：
 
-    ### Required keyword arguments:
-    - `dc` sets the pin connected to the display data/command selection input.
-      This parameter is always required.
+  - `spi` SPI 设备
+  - `width` 显示器宽度
+  - `height` 显示器高度
 
-    ### Optional keyword arguments:
+  ### 必需的关键字参数：
 
-    - `reset` sets the pin connected to the display's hardware reset input. If
-      the displays reset pin is tied high, the `reset` parameter is not
-      required.
+  - `dc` 设置连接到显示器数据/命令选择输入的引脚。 此参数始终是必需的。
 
-    - `cs` sets the pin connected to the displays chip select input. If the
-      display's CS pin is tied low, the display must be the only device
-      connected to the SPI port. The display will always be the selected
-      device, and the `cs` parameter is not required.
+  ### 可选的关键字参数：
 
-    - `backlight` sets the pin connected to the display's backlight enable
-      input. The display's backlight input can often be left floating or
-      disconnected as the backlight on some displays is always powered on and
-      cannot be turned off.
+  - `reset` 设置连接到显示器硬件复位输入的引脚。如果显示器的复位引脚被连接到高电平，那么 `reset` 参数不是必需的。
 
-    - `rotations` sets the orientation table. The orientation table is a list
-      of tuples for each `rotation` used to set the MADCTL register, display width,
-      display height, start_x, and start_y values.
+  - `cs` 设置连接到显示器芯片选择输入的引脚。如果显示器的 CS 引脚被连接到低电平，那么显示器必须是连接到 SPI 端口的唯一设备。显示器将始终是所选设备，`cs` 参数不是必需的。
 
-      Default `rotations` are included for the following st7789 and st7735
-      display sizes:
+  - `backlight` 设置连接到显示器背光使能输入的引脚。显示器的背光输入通常可以漂浮或断开连接，因为某些显示器的背光始终处于开启状态，无法关闭。
 
-      Display | Default Orientation Tables
-      ------- | --------------------------
-      240x320 | [(0x00, 240, 320,  0,  0), (0x60, 320, 240,  0,  0), (0xc0, 240, 320,  0,  0), (0xa0, 320, 240,  0,  0)]
-      170x320 |	[(0x00, 170, 320, 35, 0), (0x60, 320, 170, 0, 35), (0xc0, 170, 320, 35, 0), (0xa0, 320, 170, 0, 35)]
-      240x240 | [(0x00, 240, 240,  0,  0), (0x60, 240, 240,  0,  0), (0xc0, 240, 240,  0, 80), (0xa0, 240, 240, 80,  0)]
-      135x240 | [(0x00, 135, 240, 52, 40), (0x60, 240, 135, 40, 53), (0xc0, 135, 240, 53, 40), (0xa0, 240, 135, 40, 52)]
-      128x160 | [(0x00, 128, 160,  0,  0), (0x60, 160, 128,  0,  0), (0xc0, 128, 160,  0,  0), (0xa0, 160, 128,  0,  0)]
-      128x128 | [(0x00, 128, 128,  2,  1), (0x60, 128, 128,  1,  2), (0xc0, 128, 128,  2,  3), (0xa0, 128, 128,  3,  2)]
-       other  | [(0x00, width, height, 0, 0)]
+  - `rotations` 设置方向表。方向表是用于每个 `rotation` 的元组列表，用于设置 MADCTL 寄存器、显示器宽度、显示器高度、start_x 和 start_y 值。
 
-      You may define as many rotations as you wish.
+    默认的 `rotations` 包括以下 st7789 和 st7735 显示器大小：
 
-    - `rotation` sets the display rotation according to the orientation table.
+Display | Default Orientation Tables
+------- | --------------------------
+240x320 | [(0x00, 240, 320,  0,  0), (0x60, 320, 240,  0,  0), (0xc0, 240, 320,  0,  0), (0xa0, 320, 240,  0,  0)]
+170x320 |	[(0x00, 170, 320, 35, 0), (0x60, 320, 170, 0, 35), (0xc0, 170, 320, 35, 0), (0xa0, 320, 170, 0, 35)]
+240x240 | [(0x00, 240, 240,  0,  0), (0x60, 240, 240,  0,  0), (0xc0, 240, 240,  0, 80), (0xa0, 240, 240, 80,  0)]
+135x240 | [(0x00, 135, 240, 52, 40), (0x60, 240, 135, 40, 53), (0xc0, 135, 240, 53, 40), (0xa0, 240, 135, 40, 52)]
+128x160 | [(0x00, 128, 160,  0,  0), (0x60, 160, 128,  0,  0), (0xc0, 128, 160,  0,  0), (0xa0, 160, 128,  0,  0)]
+128x128 | [(0x00, 128, 128,  2,  1), (0x60, 128, 128,  1,  2), (0xc0, 128, 128,  2,  3), (0xa0, 128, 128,  3,  2)]
+ other  | [(0x00, width, height, 0, 0)]
 
-      The default orientation table defines four counter-clockwise rotations for 240x320, 240x240,
-      134x240, 128x160 and 128x128 displays with the LCD's ribbon cable at the bottom of the display.
-      The default rotation is Portrait (0 degrees).
+Y您可以定义任意数量的旋转。
 
-      Index | Rotation
-      ----- | --------
-      0     | Portrait (0 degrees)
-      1     | Landscape (90 degrees)
-      2     | Reverse Portrait (180 degrees)
-      3     | Reverse Landscape (270 degrees)
+- `rotation` 根据方向表设置显示旋转。
 
-    - `custom_init` List of display configuration commands to send to the display during the display init().
-        The list contains tuples with a bytes object, optionally followed by a delay specified in ms. The first
-        byte of the bytes object contains the command to send optionally followed by data bytes.
-        See the `examples/configs/t_dongle_s3/tft_config.py` file or an example.
+  默认方向表为具有LCD平移电缆位于显示器底部的240x320、240x240、134x240、128x160和128x128显示器定义了四个逆时针旋转。默认旋转是纵向（0度）。
 
-    - `color_order` Sets the color order used by the driver (st7789.RGB or st7789.BGR)
+  | 索引 | 旋转              |
+  | ---- | ----------------- |
+  | 0    | 纵向（0度）       |
+  | 1    | 横向（90度）      |
+  | 2    | 反向纵向（180度） |
+  | 3    | 反向横向（270度） |
 
-    - `inversion` Sets the display color inversion mode if True, clears the
-      display color inversion mode if false.
+- 默认的方向表为具有LCD平移电缆位于显示器底部的240x320、240x240、134x240、128x160和128x128显示器定义了四个逆时针旋转。默认旋转是纵向（0度）。
 
-    - `options` Sets driver option flags.
+- `custom_init` 包含在显示器 `init()` 期间发送到显示器的显示配置命令列表。列表包含带有字节对象的元组，可以选择性地后跟以毫秒为单位指定的延迟。字节对象的第一个字节包含要发送的命令，后面可以跟随数据字节。请参阅 `examples/configs/t_dongle_s3/tft_config.py` 文件或示例。
 
-      Option        | Description
-      ------------- | -----------
-      st7789.WRAP   | pixels, lines, polygons, and Hershey text will wrap around the display both horizontally and vertically.
-      st7789.WRAP_H | pixels, lines, polygons, and Hershey text will wrap around the display horizontally.
-      st7789.WRAP_V | pixels, lines, polygons, and Hershey text will wrap around the display vertically.
+- `color_order` 设置驱动程序使用的颜色顺序（st7789.RGB 或 st7789.BGR）。
 
-    - `buffer_size` If a buffer_size is not specified, a dynamically allocated
-      buffer is created and freed as needed. If a buffer_size is set, it must
-      be large enough to contain the largest bitmap, font character, and
-      decoded JPG image used (Rows * Columns * 2 bytes, 16bit colors in RGB565
-      notation). Dynamic allocation is slower and can cause heap fragmentation,
-      so garbage collection (GC) should be enabled.
+- `inversion` 如果为 True，则设置显示颜色反转模式，如果为 false，则清除显示颜色反转模式。
 
-- `inversion_mode(bool)` Sets the display color inversion mode if True, clears
-  the display color inversion mode if False.
+- `options` 设置驱动程序选项标志。
 
-- `madctl(value)` Returns the current value of the MADCTL register or sets the MADCTL register if a value is passed to the
-   method. The MADCTL register is used to set the display rotation and color order.
+    | 选项          | 描述                                                         |
+    | ------------- | ------------------------------------------------------------ |
+    | st7789.WRAP   | 像素、线条、多边形和Hershey文本将在显示器上水平和垂直两侧环绕。 |
+    | st7789.WRAP_H | 像素、线条、多边形和Hershey文本将在显示器上水平环绕。        |
+    | st7789.WRAP_V | 像素、线条、多边形和Hershey文本将在显示器上垂直环绕。        |
 
-  #### [MADCTL constants](#madctl-constants)
+- `buffer_size` 如果没有指定 `buffer_size`，则会创建并根据需要释放动态分配的缓冲区。如果设置了 `buffer_size`，它必须足够大，以包含使用的最大位图、字体字符和解码的JPG图像（行数*列数*2字节，RGB565表示法中的16位颜色）。动态分配速度较慢，可能会导致堆碎片，因此应启用垃圾收集（GC）。
 
-    Constant Name    | Value | Description
-    ---------------- | ----- | ----------------------
-    st7789.MADCTL_MY | 0x80  | Page Address Order
-    st7789_MADCTL_MX | 0x40  | Column Address Order
-    st7789_MADCTL_MV | 0x20  | Page/Column Order
-    st7789_MADCTL_ML | 0x10  | Line Address Order
-    st7789_MADCTL_MH | 0x04  | Display Data Latch Order
-    st7789_RGB       | 0x00  | RGB color order
-    st7789_BGR       | 0x08  | BGR color order
+- `inversion_mode(bool)` 如果为 True，则设置显示颜色反转模式，如果为 False，则清除显示颜色反转模式。
 
-   #### [MADCTL examples](#madctl-examples)
+- `madctl(value)` 返回MADCTL寄存器的当前值，如果传递了值，则设置MADCTL寄存器。MADCTL寄存器用于设置显示旋转和颜色顺序。
+
+#### [ MADCTL 常量](https://chat.openai.com/c/3124149c-96b6-4fed-bc6e-50c5efe9dbe8#madctl-constants)
+
+| 常量名称         | 值   | 描述               |
+| ---------------- | ---- | ------------------ |
+| st7789.MADCTL_MY | 0x80 | 页面地址顺序       |
+| st7789_MADCTL_MX | 0x40 | 列地址顺序         |
+| st7789_MADCTL_MV | 0x20 | 页面/列顺序        |
+| st7789_MADCTL_ML | 0x10 | 行地址顺序         |
+| st7789_MADCTL_MH | 0x04 | 显示数据锁存器顺序 |
+| st7789_RGB       | 0x00 | RGB颜色顺序        |
+| st7789_BGR       | 0x08 | BGR颜色顺序        |
+
+#### [MADCTL examples](#madctl-examples)
 
 
      Orientation | MADCTL Values for RGB color order, for BGR color order add 0x08 to the value.
@@ -426,321 +361,204 @@ of the screen.
 
 - `init()`
 
-  Must be called to initialize the display.
+  必须调用以初始化显示。
 
 - `on()`
 
-  Turn on the backlight pin if one was defined during init.
+  打开背光引脚，如果在初始化期间定义了背光引脚。
 
 - `off()`
 
-  Turn off the backlight pin if one was defined during init.
+  关闭背光引脚，如果在初始化期间定义了背光引脚。
 
 - `sleep_mode(value)`
 
-  If value is True, cause the display to enter sleep mode, otherwise wake up if value is False. During sleep display content may not be preserved.
-
+  如果值为 True，则使显示器进入睡眠模式；如果值为 False，则唤醒。在睡眠期间，显示内容可能无法保留。
 
 - `fill(color)`
 
-  Fill the display with the specified color.
+  用指定的颜色填充显示器。
 
 - `pixel(x, y, color)`
 
-  Set the specified pixel to the given `color`.
+  将指定的像素设置为给定的颜色。
 
 - `line(x0, y0, x1, y1, color)`
 
-  Draws a single line with the provided `color` from (`x0`, `y0`) to
-  (`x1`, `y1`).
+  使用提供的颜色从（`x0`，`y0`）到（`x1`，`y1`）绘制一条线。
 
 - `hline(x, y, length, color)`
 
-  Draws a single horizontal line with the provided `color` and `length`
-  in pixels. Along with `vline`, this is a fast version with fewer SPI calls.
+  使用提供的颜色和长度以像素为单位绘制一条水平线。与 `vline` 一起使用，这是一个具有较少SPI调用的快速版本。
 
 - `vline(x, y, length, color)`
 
-  Draws a single horizontal line with the provided `color` and `length`
-  in pixels.
+  使用提供的颜色和长度以像素为单位绘制一条垂直线。
 
 - `rect(x, y, width, height, color)`
 
-  Draws a rectangle from (`x`, `y`) with corresponding dimensions
+  从（`x`，`y`）开始绘制一个具有相应尺寸的矩形。
 
 - `fill_rect(x, y, width, height, color)`
 
-  Fill a rectangle starting from (`x`, `y`) coordinates
+  从（`x`，`y`）坐标开始填充一个具有相应尺寸的矩形。
 
 - `circle(x, y, r, color)`
 
-  Draws a circle with radius `r` centered at the (`x`, `y`) coordinates in the given
-  `color`.
+  在给定颜色下，以（`x`，`y`）坐标为中心绘制半径为 `r` 的圆。
 
 - `fill_circle(x, y, r, color)`
 
-  Draws a filled circle with radius `r` centered at the (`x`, `y`) coordinates
-  in the given `color`.
+  在给定颜色下，以（`x`，`y`）坐标为中心绘制填充的半径为 `r` 的圆。
 
 - `blit_buffer(buffer, x, y, width, height)`
 
-  Copy bytes() or bytearray() content to the screen internal memory. Note:
-  every color requires 2 bytes in the array
+  将 `bytes()` 或 `bytearray()` 的内容复制到屏幕的内部存储器。注意：数组中的每种颜色都需要2字节。
 
 - `text(font, s, x, y[, fg, bg])`
 
-  Write `s` (integer, string or bytes) to the display using the specified bitmap
-  `font` with the coordinates as the upper-left corner of the text. The optional
-  arguments `fg` and `bg` can set the foreground and background colors of the
-  text; otherwise the foreground color defaults to `WHITE`, and the background
-  color defaults to `BLACK`. See the `README.md` in the `fonts/bitmap` directory
-  for example fonts.
+  使用指定的位图 `font` 和坐标作为文本的左上角，将 `s`（整数、字符串或字节）写入显示器。可选参数 `fg` 和 `bg` 可以设置文本的前景和背景颜色；否则，前景颜色默认为 `WHITE`，背景颜色默认为 `BLACK`。有关示例字体，请参见 `fonts/bitmap` 文件夹中的 `README.md`。
 
 - `write(bitmap_font, s, x, y[, fg, bg, background_tuple, fill_flag])`
 
-  Write text to the display using the specified proportional or Monospace bitmap
-  font module with the coordinates as the upper-left corner of the text. The
-  foreground and background colors of the text can be set by the optional
-  arguments `fg` and `bg`, otherwise the foreground color defaults to `WHITE`
-  and the background color defaults to `BLACK`.
+  使用指定的比例或等宽位图 `font` 模块，以坐标作为文本的左上角，将 `s` 写入显示器。文本的前景和背景颜色可以通过可选的参数 `fg` 和 `bg` 设置，否则前景颜色默认为 `WHITE`，背景颜色默认为 `BLACK`。
 
-  Transparency can be emulated by providing a `background_tuple` containing
-  (bitmap_buffer, width, height). This is the same format used by the jpg_decode
-  method. See examples/T-DISPLAY/clock/clock.py for an example.
+  可以通过提供包含（bitmap_buffer，width，height）的 `background_tuple` 来模拟透明度。这与 `jpg_decode` 方法使用的格式相同。有关示例字体，请参见 `truetype/fonts` 文件夹中的 `README.md`。接受UTF8编码的字符串。
 
-  See the `README.md` in the `truetype/fonts` directory for example fonts.
-  Returns the width of the string as printed in pixels. Accepts UTF8 encoded strings.
-
-  The `font2bitmap` utility creates compatible 1 bit per pixel bitmap modules
-  from Proportional or Monospaced True Type fonts. The character size,
-  foreground, background colors, and characters in the bitmap
-  module may be specified as parameters. Use the -h option for details. If you
-  specify a buffer_size during the display initialization, it must be large
-  enough to hold the widest character (HEIGHT * MAX_WIDTH * 2).
+  `font2bitmap` 实用程序从等宽或等宽True Type字体创建兼容的每像素1位位图模块。字符大小、前景、背景颜色和位图模块中的字符可以作为参数指定。使用-h选项获取详细信息。如果在显示初始化期间指定了 `buffer_size`，它必须足够大，以容纳最宽字符（HEIGHT * MAX_WIDTH * 2）。
 
 - `write_len(bitap_font, s)`
 
-  Returns the string's width in pixels if printed in the specified font.
+  返回使用指定字体打印的字符串的宽度（以像素为单位）。
 
 - `draw(vector_font, s, x, y[, fg, scale])`
 
-  Draw text to the display using the specified Hershey vector font with the
-  coordinates as the lower-left corner of the text. The foreground color of the
-  text can be set by the optional argument `fg`. Otherwise the foreground color
-  defaults to `WHITE`. The size of the text can be scaled by specifying a
-  `scale` value. The `scale` value must be larger than 0 and can be a
-  floating-point or an integer value. The `scale` value defaults to 1.0. See
-  the README.md in the `vector/fonts` directory, for example fonts and the
-  utils directory for a font conversion program.
+  使用指定的Hershey矢量字体，在坐标作为文本的左下角，绘制文本。文本的前景颜色可以通过可选参数 `fg` 设置，否则前景颜色默认为 `WHITE`。文本的大小可以通过指定 `scale` 值来缩放。`scale` 值必须大于0，可以是浮点数或整数值。`scale` 值默认为1.0。请参阅 `vector/fonts` 文件夹中的 `README.md` 以获取示例字体和 `utils` 文件夹中的字体转换程序。
 
 - `draw_len(vector_font, s[, scale])`
 
-  Returns the string's width in pixels if drawn with the specified font.
+  如果使用指定字体绘制，返回字符串的宽度（以像素为单位）。
 
 - `jpg(jpg, x, y [, method])`
 
-  Draw a `jpg` on the display with the given `x` and `y` coordinates as the
-  upper left corner of the image. `jpg` may be a string containing a filename
-  or a buffer containing the JPEG image data.
+  使用给定的 `x` 和 `y` 坐标作为图像的左上角，在显示器上绘制 `jpg`。`jpg` 可以是包含文件名的字符串，也可以是包含JPEG图像数据的缓冲区。
 
-  The memory required to decode and display a JPG can be considerable as a full-screen
-  320x240 JPG would require at least 3100 bytes for the working area + 320 * 240 * 2
-  bytes of ram to buffer the image. Jpg images that would require a buffer larger than
-  available memory can be drawn by passing `SLOW` for the `method`. The `SLOW` `method`
-  will draw the image one piece at a time using the Minimum Coded Unit (MCU, typically
-  a multiple of 8x8) of the image. The default method is `FAST`.
+  解码和显示JPG所需的内存可能相当可观，因为全屏320x240的JPG至少需要3100字节的工作区 + 缓冲映像的320 * 240 * 2字节的RAM。如果Jpg图像的缓冲区比可用内存大，可以通过传递 `method` 为 `SLOW` 来绘制该图像。`SLOW` `method` 将使用图像的最小编码单元（MCU，通常是8x8的倍数）逐个绘制图像。默认方法是 `FAST`。
 
 - `jpg_decode(jpg_filename [, x, y, width, height])`
 
-  Decode a jpg file and return it or a portion of it as a tuple composed of
-  (buffer, width, height). The buffer is a color565 blit_buffer compatible byte
-  array. The buffer will require width * height * 2 bytes of memory.
+  解码JPG文件并将其作为元组返回，由（buffer，width，height）组成。缓冲区是一个与color565 blit_buffer兼容的字节数组。缓冲区将需要width * height * 2字节的内存。
 
-  If the optional x, y, width, and height parameters are given, the buffer will
-  only contain the specified area of the image. See examples/T-DISPLAY/clock/clock.py
-  examples/T-DISPLAY/toasters_jpg/toasters_jpg.py for examples.
+  如果给定了可选的x，y，width和height参数，则缓冲区将仅包含图像的指定区域。有关示例，请参见 `examples/T-DISPLAY/clock/clock.py` 和 `examples/T-DISPLAY/toasters_jpg/toasters_jpg.py`。
 
 - `png(png_filename, x, y [, mask])`
 
-  Draw a PNG file on the display with upper left corner of the image at the given `x` and `y`
-  coordinates. The PNG will be clipped if it is not able to fit fully on the display. The
-  PNG will be drawn one line at a time. Since the driver does not contain a frame buffer, 
-  transparency is not supported. Providing a `True` value for the `mask` parameter
-  will prevent pixels with a zero alpha channel value from being displayed.  Drawing masked PNG's is
-  slower than non-masked as each visible line segment is drawn separately. For an example of using a
-  mask, see the alien.py program in the examples/png folder.
+  在显示器上以给定的 `x` 和 `y` 坐标的左上角绘制PNG文件。如果无法完全适应显示器，则会裁剪PNG。PNG将逐行绘制。由于驱动程序不包含帧缓冲区，因此不支持透明度。为 `mask` 参数提供 `True` 值将防止显示具有零alpha通道值的像素。绘制具有蒙版的PNG比无蒙版的绘制更慢，因为每个可见的线段都是分开绘制的。有关使用蒙版的示例，请参见 examples/png 文件夹中的 alien.py 程序。
 
 - `polygon_center(polygon)`
 
-   Return the center of the `polygon` as an (x, y) tuple. The `polygon` should
-   consist of a list of (x, y) tuples forming a closed convex polygon.
+  将多边形的中心作为元组（x，y）返回。多边形应包含形成闭合凸多边形的（x，y）元组的列表。
 
 - `fill_polygon(polygon, x, y, color[, angle, center_x, center_y])`
 
-  Draw a filled `polygon` at the `x`, and `y` coordinates in the `color` given.
-  The polygon may be rotated `angle` radians about the `center_x` and
-  `center_y` point. The polygon should consist of a list of (x, y) tuples
-  forming a closed convex polygon.
+  在给定的 `x` 和 `y` 坐标以及给定的颜色中绘制填充的 `polygon`。可以围绕 `center_x` 和 `center_y` 点旋转 `angle` 弧度。多边形应包含形成闭合凸多边形的（x，y）元组的列表。
 
-  See the TWATCH-2020 `watch.py` demo for an example.
+  请参见 TWATCH-2020 的 `watch.py` 演示以获取示例。
 
 - `polygon(polygon, x, y, color, angle, center_x, center_y)`
 
-  Draw a `polygon` at the `x`, and `y` coordinates in the `color` given. The
-  polygon may be rotated `angle` radians about the `center_x` and `center_y`
-  point. The polygon should consist of a list of (x, y) tuples forming a closed
-  convex polygon.
+  在给定的 `x` 和 `y` 坐标以及给定的颜色中绘制 `polygon`。可以围绕 `center_x` 和 `center_y` 点旋转 `angle` 弧度。多边形应包含形成闭合凸多边形的（x，y）元组的列表。
 
-  See the T-Display `roids.py` for an example.
+  请参见 T-Display 的 `roids.py` 以获取示例。
 
 - `bounding({status, as_rect})`
 
-  Bounding enables or disables tracking the display area that has been written
-  to. Initially, tracking is disabled; pass a True value to enable tracking and
-  False to disable it. Passing a True or False parameter will reset the current
-  bounding rectangle to (display_width, display_height, 0, 0).
+  启用或禁用跟踪自上次清除以来写入到的显示区域。最初，跟踪是禁用的；传递 `True` 值将启用跟踪，传递 `False` 将禁用它。传递 `True` 或 `False` 参数将重置当前的边界矩形为（display_width，display_height，0，0）。
 
-  Returns a four integer tuple containing (min_x, min_y, max_x, max_y)
-  indicating the area of the display that has been written to since the last
-  clearing.
+  返回包含（min_x，min_y，max_x，max_y）的四个整数元组，指示自上次清除以来写入到的显示区域。如果 `as_rect` 参数为 `True`，返回的元组将包含（min_x，min_y，width，height）值。
 
-  If `as_rect` parameter is True, the returned tuple will contain (min_x,
-  min_y, width, height) values.
+  有关示例，请参见 TWATCH-2020 的 `watch.py` 演示。
 
-  See the TWATCH-2020 `watch.py` demo for an example.
+
+- `polygon(polygon, x, y, color, angle, center_x, center_y)`
+
+  在给定的 `x` 和 `y` 坐标处，以指定的 `color` 绘制一个 `polygon`。该多边形可以围绕 `center_x` 和 `center_y` 点旋转 `angle` 弧度。 多边形应该由形成封闭凸多边形的 (x, y) 元组列表组成。
+  
+  有关示例，请参见 T-Display 中的 `roids.py`。
+  
+- `bounding({status, as_rect})`
+
+   Bounding 用于启用或禁用跟踪自上次清除以来已写入的显示区域。初始情况下，跟踪被禁用；传递 True 以启用跟踪，传递 False 以禁用跟踪。 传递 True 或 False 参数将重置当前的边界矩形为 (display_width, display_height, 0, 0)。
+
+   返回包含四个整数的元组，表示自上次清除以来已写入的显示区域。
+
+   如果 `as_rect` 参数为 True，则返回的元组将包含 (min_x, min_y, width, height) 的值。
+
+   有关示例，请参见 TWATCH-2020 中的 `watch.py` 演示。
 
 - `bitmap(bitmap, x , y [, index])`
 
-  Draw `bitmap` using the specified `x`, `y` coordinates as the upper-left
-  corner of the `bitmap`. The optional `index` parameter provides a method to
-  select from multiple bitmaps contained a `bitmap` module. The `index` is used
-  to calculate the offset to the beginning of the desired bitmap using the
-  modules HEIGHT, WIDTH, and BPP values.
+  使用指定的 `x`、`y` 坐标作为位图的左上角绘制 `bitmap`。可选的 `index` 参数提供了一种从包含 `bitmap` 模块的多个位图中选择的方法。 `index` 用于使用模块的 HEIGHT、WIDTH 和 BPP 值计算到所需位图开头的偏移量。
+  
+  `imgtobitmap.py` 实用程序使用 Pillow Python Imaging 库从图像文件创建与位图兼容的每像素 1 到 8 位的位图模块。
+  
+  `monofont2bitmap.py` 实用程序从等宽 True Type 字体创建与位图兼容的每像素 1 到 8 位的位图模块。 在 `examples/lib` 文件夹中查看 `inconsolata_16.py`、`inconsolata_32.py` 和 `inconsolata_64.py` 文件，了解示例模块， 并在 `mono_font.py` 程序中查看使用生成的模块的示例。
 
-  The `imgtobitmap.py` utility creates compatible 1 to 8 bit per pixel bitmap
-  modules from image files using the Pillow Python Imaging Library.
-
-  The `monofont2bitmap.py` utility creates compatible 1 to 8 bit per pixel
-  bitmap modules from Monospaced True Type fonts. See the `inconsolata_16.py`,
-  `inconsolata_32.py` and `inconsolata_64.py` files in the `examples/lib`
-  folder for sample modules and the `mono_font.py` program for an example using
-  the generated modules.
-
-  The character sizes, bit per pixel, foreground, background colors, and the
-  characters to include in the bitmap module may be specified as parameters.
-  Use the -h option for details. Bits per pixel settings larger than one may be
-  used to create antialiased characters at the expense of memory use. If you
-  specify a buffer_size during the display initialization, it must be large
-  enough to hold the one character (HEIGHT * WIDTH * 2).
-
+  字符大小、每像素位数、前景、背景颜色以及要包含在位图模块中的字符可以作为参数指定。使用 -h 选项获取详细信息。 大于 1 的每像素位数设置可用于创建抗锯齿字符，但会增加内存使用。如果在显示初始化期间指定了 buffer_size， 则它必须足够大，以容纳一个字符 (HEIGHT * WIDTH * 2)。
+  
 - `width()`
 
-  Returns the current logical width of the display. (ie a 135x240 display
-  rotated 90 degrees is 240 pixels wide)
+   返回显示的当前逻辑宽度。（例如，将 135x240 显示旋转 90 度后，宽度为 240 像素）
 
 - `height()`
 
-  Returns the current logical height of the display. (ie a 135x240 display
-  rotated 90 degrees is 135 pixels high)
+   返回显示的当前逻辑高度。（例如，将 135x240 显示旋转 90 度后，高度为 135 像素）
 
 - `rotation(r)`
 
-  Set the rotates the logical display in a counter-clockwise direction.
-  0-Portrait (0 degrees), 1-Landscape (90 degrees), 2-Inverse Portrait (180
-  degrees), 3-Inverse Landscape (270 degrees)
+  设置逻辑显示在逆时针方向旋转。0-纵向（0度），1-横向（90度），2-反向纵向（180度），3-反向横向（270度）
+  
+- `offset(x_start, y_start)` ST7789 控制器的内存配置为 240x320 显示。当使用较小的显示器，如 240x240 或 135x240 时，需要向 x 和 y 参数添加偏移量，以便像素被写入对应于可见显示的内存区域。在旋转显示时，可能需要调整这些偏移量。
 
-- `offset(x_start, y_start)` The memory in the ST7789 controller is configured
-  for a 240x320 display. When using a smaller display like a 240x240 or
-  135x240, an offset needs to be added to the x and y parameters so that the
-    pixels are written to the memory area corresponding to the visible display.
-  The offsets may need to be adjusted when rotating the display.
+   例如，TTGO-TDisplay 是 135x240，使用以下偏移量。
 
-  For example, the TTGO-TDisplay is 135x240 and uses the following offsets.
+   | 旋转 | x_start | y_start |
+   | ---- | ------- | ------- |
+   | 0    | 52      | 40      |
+   | 1    | 40      | 53      |
+   | 2    | 53      | 40      |
+   | 3    | 40      | 52      |
 
-  | Rotation | x_start | y_start |
-  |----------|---------|---------|
-  | 0        | 52      | 40      |
-  | 1        | 40      | 53      |
-  | 2        | 53      | 40      |
-  | 3        | 40      | 52      |
+## 滚动
 
-  When the rotation method is called, the driver will adjust the offsets for a
-  135x240 or 240x240 display. Your display may require using different offset
-  values; if so, use the `offset` method after `rotation` to set the offset
-  values.
+st7789 显示控制器包含一个用于存储显示像素的 240x320 像素帧缓冲区。对于滚动，帧缓冲区包含三个单独的区域：(`tfa`) 顶部固定区域，(`height`) 滚动区域和 (`bfa`) 底部固定区域。`tfa` 是不滚动的像素的上部分。`height` 是帧缓冲区的中间部分，用于滚动。`bfa` 是帧缓冲区的下部分，其中的像素不滚动。这些值控制了滚动整个显示区域或部分显示区域的能力。
 
-  The values needed for a particular display may not be documented and may
-  require some experimentation to determine the correct values. One technique
-  is to draw a box the same size as the display and then make small changes to
-  the offsets until the display looks correct. See the `cfg_helper.py` program
-  in the examples folder for more information.
+对于高度为 320 像素的显示器，将 `tfa` 设置为 0，`height` 设置为 320，`bfa` 设置为 0 将允许滚动整个显示器。您可以将 `tfa` 和 `bfa` 设置为非零值以滚动显示的部分。`tfa` + `height` + `bfa` 应等于 320，否则滚动模式将未定义。
 
+高度小于 320 像素的显示器，`tfa`、`height` 和 `bfa` 将需要进行调整以补偿较小的 LCD 面板。实际值将根据 LCD 面板的配置而变化。例如，滚动整个 135x240 TTGO T-Display 需要 `tfa` 值为 40，`height` 值为 240，`bfa` 值为 40（40+240+40=320），因为 T-Display LCD 显示从帧缓冲区的第 40 行开始的 240 行，留下了未显示的最后 40 行。
 
-The module exposes predefined colors:
-  `BLACK`, `BLUE`, `RED`, `GREEN`, `CYAN`, `MAGENTA`, `YELLOW`, and `WHITE`
+其他显示器，如 Waveshare Pico LCD 1.3 英寸 240x240 显示器，则需要将 `tfa` 设置为 0，`height` 设置为 240，`bfa` 设置为 80（0+240+80=320）以滚动整个显示器。Pico LCD 1.3 从帧缓冲区的第 0 行开始显示 240 行，留下了未显示的最后 80 行。
 
-## Scrolling
+`vscsad` 方法设置 (VSSA) 垂直滚动起始地址。VSSA 设置帧缓冲区中将成为 `tfa` 之后的第一行的行。
 
-The st7789 display controller contains a 240 by 320-pixel frame buffer used to
-store the pixels for the display. For scrolling, the frame buffer consists of
-three separate areas; The (`tfa`) top fixed area, the (`height`) scrolling
-area, and the (`bfa`) bottom fixed area. The `tfa` is the upper portion of the
-frame buffer in pixels not to scroll. The `height` is the center portion of the
-frame buffer in pixels to scroll. The `bfa` is the lower portion of the frame
-buffer in pixels not to scroll. These values control the ability to scroll the
-entire or a part of the display.
+    ST7789 datasheet中的警告指出：
+    
+    垂直滚动起始地址（VSSA）的数值是绝对的（相对于帧内存），它不应进入由垂直滚动定义确定的固定区域，否则在面板上将显示不期望的图像。
+    简而言之，这个警告是在建议设置垂直滚动起始地址（VSSA）时，确保指定的值不落在固定区域内，比如顶部固定区域（tfa）和底部固定区域（bfa）。如果VSSA值进入这些固定区域，可能导致面板上显示不期望的图像。因此，在设置VSSA时，需要仔细考虑tfa、height和bfa的值，确保滚动仅发生在帧内存的预期可滚动区域内，以避免滚动时出现意外的图像问题。
 
-For displays that are 320 pixels high, setting the `tfa` to 0, `height` to 320,
-and `bfa` to 0 will allow scrolling of the entire display. You can set the
-`tfa` and `bfa` to a non-zero value to scroll a portion of the display. `tfa` +
-`height` + `bfa` = should equal 320, otherwise the scrolling mode is undefined.
+- `vscrdef(tfa, height, bfa)`：设置垂直滚动参数。
+  - `tfa` 是顶部固定区域的像素数。顶部固定区域是显示帧缓冲区的上部分，不会被滚动。
+  - `height` 是要滚动的区域的总高度（以像素为单位）。
+  - `bfa` 是底部固定区域的像素数。底部固定区域是显示帧缓冲区的下部分，不会被滚动。
+- `vscsad(vssa)`：设置垂直滚动地址。
+  - `vssa` 是垂直滚动起始地址，以像素为单位。垂直滚动起始地址是帧缓冲区中将在TFA之后显示的第一行。
 
-Displays less than 320 pixels high, the `tfa`, `height`, and `bfa` will need to
-be adjusted to compensate for the smaller LCD panel. The actual values will
-vary depending on the configuration of the LCD panel. For example, scrolling
-the entire 135x240 TTGO T-Display requires a `tfa` value of 40, `height` value
-of 240, and `bfa` value of 40 (40+240+40=320) because the T-Display LCD shows
-240 rows starting at the 40th row of the frame buffer, leaving the last 40 rows
-of the frame buffer undisplayed.
+-  辅助函数
 
-Other displays like the Waveshare Pico LCD 1.3 inch 240x240 display require the
-`tfa` set to 0, `height` set to 240, and `bfa` set to 80 (0+240+80=320) to
-scroll the entire display. The Pico LCD 1.3 shows 240 rows starting at the 0th
-row of the frame buffer, leaving the last 80 rows of the frame buffer
-undisplayed.
-
-The `vscsad` method sets the (VSSA) Vertical Scroll Start Address. The VSSA
-sets the line in the frame buffer that will be the first line after the `tfa`.
-
-    The ST7789 datasheet warns:
-
-    The value of the vertical scrolling start address is absolute (with reference to the frame memory),
-    it must not enter the fixed area (defined by Vertical Scrolling Definition, otherwise undesirable
-    image will be displayed on the panel.
-
-- `vscrdef(tfa, height, bfa)` Set the vertical scrolling parameters.
-
-  `tfa` is the top fixed area in pixels. The top fixed area is the upper
-  portion of the display frame buffer that will not be scrolled.
-
-  `height` is the total height in pixels of the area scrolled.
-
-  `bfa` is the bottom fixed area in pixels. The bottom fixed area is the lower
-  portion of the display frame buffer that will not be scrolled.
-
-- `vscsad(vssa)` Set the vertical scroll address.
-
-  `vssa` is the vertical scroll start address in pixels. The vertical scroll
-  start address is the line in the frame buffer will be the first line shown
-  after the TFA.
-
-## Helper functions
-
-- `color565(r, g, b)`
-
-  Pack a color into 2-bytes rgb565 format
-
-- `map_bitarray_to_rgb565(bitarray, buffer, width, color=WHITE, bg_color=BLACK)`
-
-  Convert a `bitarray` to the rgb565 color `buffer` suitable for blitting. Bit
-  1 in `bitarray` is a pixel with `color` and 0 - with `bg_color`.
+  - `color565(r, g, b)`
+  
+    将颜色打包成2字节的RGB565格式。
+  
+  - `map_bitarray_to_rgb565(bitarray, buffer, width, color=WHITE, bg_color=BLACK)`
+  
+    将`bitarray`转换为适合进行blit的RGB565颜色`buffer`。`bitarray`中的位1表示一个带有`color`的像素，而位0表示带有`bg_color`的像素。
